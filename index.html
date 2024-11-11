@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Visionary</title>
@@ -9,14 +10,8 @@
 <body>
 <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
 <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
-
-<h1>Visionary</h1>
-
 <section id="demos" class="invisible">
-
-  <h2><br>Continuous hand gesture detection</h2>
-  <p>Use your hand to make gestures in front of the camera to get gesture classification. </br>Click <b>enable webcam</b> below and grant access to the webcam if prompted.</p>
-
+  <h2><br>Visionary</h2>
   <div id="liveView" class="videoView">
     <button id="webcamButton" class="mdc-button mdc-button--raised">
       <span class="mdc-button__ripple"></span>
@@ -24,13 +19,12 @@
     </button>
     <div style="position: relative;">
       <video id="webcam" autoplay playsinline></video>
-      <canvas class="output_canvas" id="output_canvas" width="2560" height="1440" style="position: absolute; left: 0px; top: 0px;"></canvas>
+      <canvas class="output_canvas" id="output_canvas" width="5760" height="3240" style="position: absolute; left: -10px; top: 10px;"></canvas>
       <p id='gesture_output' class="output">
     </div>
   </div>
 </section>
-
   <script type="module" src="./script.js"></script>
-
 </body>
+
 </html>
