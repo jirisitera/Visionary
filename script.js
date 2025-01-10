@@ -10,30 +10,38 @@ const canvas = window.document.getElementById("canvas");
 const startButton = window.document.getElementById("startButton");
 const addButton = window.document.getElementById("addButton");
 const removeButton = window.document.getElementById("removeButton");
-const circle = window.document.getElementById("circle");
 const drawingCanvas = canvas.getContext("2d");
-// get url parameters
-const parameters = new URLSearchParams(window.location.search);
-const url = parameters.get("url")
-const port = parameters.get("port")
-const topic = parameters.get("topic")
-if (url === null || port === null || topic === null) {
-  alert("Critical error: Malformed URL. Missing required parameters!")
-  throw new Error("Malformed URL. Missing required parameters!")
-}
-const topicX = topic + "_x"
-const topicY = topic + "_y"
 // define variables
 let recognizer;
 let cameraStatus;
 let resultsCache;
 let lastTime;
 let lastKeybind;
-let circleSize = 1;
 let x = 0;
 let y = 0;
 let lastX = 0;
 let lastY = 0;
+// prepare mqtt client
+const parameters = new URLSearchParams(window.location.search);
+const url = parameters.get("url")
+const port = parameters.get("port")
+const topic = parameters.get("topic")
+if (url !== null && port !== null && topic !== null) {
+  const client = mqtt.connect("wss://" + url + ":" + port + "/mqtt", {
+    clean: true,
+    connectTimeout: 4000,
+    clientId: crypto.randomUUID(),
+    username: "",
+    password: "",
+  })
+  const topicX = topic + "_x"
+  const topicY = topic + "_y"
+  client.subscribe(topic)
+  client.subscribe(topicX)
+  client.subscribe(topicY)
+  window.setInterval(sendGesture, 1000);
+  window.setInterval(sendLocation, 1000);
+}
 // load model
 const createGestureRecognizer = async () => {
   const vision = await FilesetResolver.forVisionTasks(
@@ -54,20 +62,6 @@ createGestureRecognizer();
 startButton.addEventListener("click", enableWebcam);
 addButton.addEventListener("click", addKeybind);
 removeButton.addEventListener("click", removeKeybind);
-// prepare mqtt client
-const client = mqtt.connect("wss://" + url + ":" + port + "/mqtt", {
-  clean: true,
-  connectTimeout: 4000,
-  clientId: crypto.randomUUID(),
-  username: "",
-  password: "",
-})
-client.subscribe(topic)
-client.subscribe(topicX)
-client.subscribe(topicY)
-// schedule tasks
-window.setInterval(sendGesture, 1000);
-window.setInterval(sendLocation, 1000);
 
 function addKeybind() {
   const table = document.getElementById("keybinds");
@@ -117,14 +111,6 @@ async function predictWebcam() {
       utils.drawLandmarks(landmarks, {color: "#ffffff", lineWidth: 4});
       x = landmarks[8].x;
       y = landmarks[8].y;
-      if (x < 0.53 && x > 0.47 && y < 0.53 && y > 0.47) {
-        circleSize += 1;
-        circle.style.width = circleSize + "px";
-        circle.style.height = circleSize + "px";
-        if (circleSize > 50) {
-          circleSize = 1;
-        }
-      }
     }
   }
   drawingCanvas.restore();
